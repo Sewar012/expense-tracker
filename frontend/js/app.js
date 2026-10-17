@@ -36,6 +36,7 @@ async function fetchExpenses() {
     
     allExpenses = await res.json();
     updateSummaryCards(allExpenses);
+    CalculateAvg(allExpenses);
     renderTable(allExpenses);
   } catch (err) {
     showAlert('Server error or connection failed: ' + err.message);
@@ -52,6 +53,12 @@ function updateSummaryCards(expenses) {
   totalAmountEl.textContent = `$${total.toFixed(2)}`;
   totalCountEl.textContent = count;
   highestExpenseEl.textContent = `$${highest.toFixed(2)}`;
+}
+
+function CalculateAvg(expenses) {
+  const total = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+  const count = expenses.length;
+  return count > 0 ? total / count : 0;
 }
 
 function renderTable(expenses) {

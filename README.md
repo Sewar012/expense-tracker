@@ -37,3 +37,9 @@ A full-stack web application built to track personal expenses, connect to a REST
 1. Open terminal and navigate to the backend directory:
    ```bash
    cd backend
+
+
+## Demo Video & Repository Links
+https://drive.google.com/file/d/17x9sbyQ0eU6Yke0BE8ZSoqa0zbckR10y/view?usp=sharing
+
+- **GitHub Repository:** [Sewar012/expense-tracker](https://github.com/Sewar012/expense-tracker)

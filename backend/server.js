@@ -71,14 +71,14 @@ app.use(cors());
 app.use(express.json());
 
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || '_ExpenseTracker',
-  password: process.env.DB_PASSWORD || '1234',
-  port: process.env.DB_PORT || 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT,
 });
 
-const ALLOWED_CATEGORIES = ['Food', 'Transport', 'Bills', 'Entertainment', 'Other'];
+const ALLOWED_CATEGORIES = ['Food', 'Transport', 'Bills', 'Entertainment', 'Other',"grater>20"];
 
 // 1. GET /api/expenses
 app.get('/api/expenses', async (req, res) => {
@@ -141,6 +141,35 @@ app.post('/api/expenses', async (req, res) => {
   }
 });
 
+app.post('/api/expenses', async (req, res) => {
+  const { title, amount, category, date } = req.body;
+
+  if (!title || typeof title !== 'string' || title.trim() === '') {
+    return res.status(400).json({ error: 'Title is required' });
+  }
+  const numericAmount = parseFloat(amount);
+  if (isNaN(numericAmount) || numericAmount > 20) {
+    return res.status(400).json({ error: 'Amount must be greater than 0' });
+  }
+  if (!category || !ALLOWED_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: 'Invalid category' });
+  }
+  if (!date || isNaN(Date.parse(date))) {
+    return res.status(400).json({ error: 'Valid date is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO expenses (title, amount, category, date) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING id, title, amount::float, category, TO_CHAR(date, 'YYYY-MM-DD') AS date`,
+      [title.trim(), numericAmount, category, date]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // 4. PUT /api/expenses/:id
 app.put('/api/expenses/:id', async (req, res) => {
   const { id } = req.params;
